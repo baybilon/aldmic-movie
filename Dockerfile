@@ -15,7 +15,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
 # Setup permissions
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
