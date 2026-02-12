@@ -1,5 +1,8 @@
 <?php
 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED & ~E_NOTICE);
+ini_set('display_errors', '0');
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application
