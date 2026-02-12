@@ -28,9 +28,9 @@ Route::get('lang/{locale}', function ($locale) {
 Route::group(['middleware' => 'checkAuth'], function () {
     Route::get('/movies', 'MovieController@index')->name('movies.index');
     Route::get('/movies/{id}', 'MovieController@detail')->name('movies.detail');
-    Route::get('/favorites', 'MovieController@favorites')->name('movies.favorites');
-    Route::post('/favorites', 'MovieController@addFavorite');
-    Route::delete('/favorites/{id}', 'MovieController@deleteFavorite');
-    Route::get('/logout', 'AuthController@logout');
+    Route::get('/favorites', 'FavoriteController@index')->name('movies.favorites');
+    Route::post('/favorites', 'FavoriteController@store');
+    Route::delete('/favorites/{imdbID}', 'FavoriteController@destroy')->name('favorites.delete');  
+    Route::post('/logout', 'AuthController@logout')->name('logout');
 });
 

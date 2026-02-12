@@ -9,24 +9,18 @@ use App\User;
 
 class AuthController extends Controller
 {
-    /**
-     * Menampilkan halaman login
-     */
+
     public function showLogin()
     {
-        // Jika sudah login, langsung lempar ke halaman movies
+
         if (Auth::check()) {
             return redirect()->route('movies.index');
         }
         return view('auth.login');
     }
 
-    /**
-     * Memproses data login
-     */
-    public function login(Request $request)
-    {
-        // Validasi input
+
+    public function login(Request $request){
         $this->validate($request, [
             'username' => 'required',
             'password' => 'required',
@@ -37,21 +31,15 @@ class AuthController extends Controller
             'password' => $request->password,
         ];
 
-        // Mencoba login
         if (Auth::attempt($credentials)) {
-            // Jika berhasil
             return redirect()->route('movies.index');
         }
 
-        // Jika gagal, kembali ke login dengan pesan kesalahan
         return redirect()->back()
             ->withInput($request->only('username'))
-            ->withErrors(['msg' => 'Username atau Password salah!']);
+            ->withErrors(['msg' => __('msg.login_failed')]); 
     }
 
-    /**
-     * Proses Logout
-     */
     public function logout()
     {
         Auth::logout();

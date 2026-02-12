@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use GuzzleHttp\Client; // Import Guzzle
+use GuzzleHttp\Client;
 use App\Favorite;
 use Auth;
 
-class MovieController extends Controller
-{
+class MovieController extends Controller{
     private $apiKey;
 
     public function __construct() {
@@ -16,35 +15,31 @@ class MovieController extends Controller
     }
 
     public function index() {
-        return view('movies.index', ['apiKey' => $this->apiKey]);
+        $favoriteIds = \App\Favorite::pluck('imdbID')->toArray(); 
+
+        return view('movies.index', [
+                'apiKey' => $this->apiKey,
+                'favoriteIds' => $favoriteIds,
+                'defaultSearch' => 'Marvel'
+            ]);
     }
 
     public function detail($id) {
         $client = new Client();
-        $response = $client->get("http://www.omdbapi.com/?apikey={$this->apiKey}&i={$id}");
+        $response = $client->get("https://www.omdbapi.com/?apikey={$this->apiKey}&i={$id}");
         $movie = json_decode($response->getBody(), true);
 
-        return view('movies.detail', compact('movie'));
-    }
+        $isFavorite = \App\Favorite::where('imdbID', $id)->exists();
 
-    public function addFavorite(Request $request) {
-        Favorite::updateOrCreate(
-            ['imdbID' => $request->imdbID],
-            [
-                'title' => $request->title,
-                'poster' => $request->poster
-            ]
-        );
-        return response()->json(['message' => 'Added to favorites!']);
+        return view('movies.detail', compact('movie', 'isFavorite'));
     }
 
     public function favorites() {
-        $favorites = Favorite::all();
-        return view('movies.favorites', compact('favorites'));
+        $favorites = \App\Favorite::all(); 
+
+        return view('movies.favorites', [
+            'favorites' => $favorites
+        ]);
     }
 
-    public function deleteFavorite($id) {
-        Favorite::where('imdbID', $id)->delete();
-        return back()->with('success', 'Movie removed from favorites');
-    }
 }

@@ -11,16 +11,18 @@ class CreateFavoritesTable extends Migration
      *
      * @return void
      */
+
+    public $withinTransaction = false;
+
     public function up()
     {
         Schema::create('favorites', function (Blueprint $table) {
         $table->increments('id');
-        $table->string('imdbID')->unique();
-        $table->string('title');
-        $table->string('year')->nullable();
-        $table->string('type')->nullable();
-        $table->text('poster')->nullable();
+        $table->string('user_id')->unsigned();
+        $table->string('imdbID');
         $table->timestamps();
+
+        $table->unique(['user_id', 'imdbID']);
         });
     }
 

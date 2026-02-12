@@ -6,5 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Favorite extends Model
 {
-   protected $fillable = ['imdb_id','title','year','type','poster'];
+    protected $table = 'favorites';
+    protected $fillable = ['user_id', 'imdbID'];
 }
