@@ -14,11 +14,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
+
+RUN mkdir -p /app/bootstrap/cache /app/storage/framework/sessions /app/storage/framework/views /app/storage/framework/cache
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+RUN chmod -R 775 /app/storage /app/bootstrap/cache
+
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
-
-# Setup permissions
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
 # Expose port 80
 EXPOSE 80
