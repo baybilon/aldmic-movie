@@ -1,30 +1,33 @@
-FROM php:7.4-fpm
+FROM php:7.1-fpm
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    git curl libpng-dev libonig-dev libxml2-dev zip unzip nginx
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i '/stretch-updates/d' /etc/apt/sources.list
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Get Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx \
+    git \
+    curl \
+    libpng-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install exif
+RUN docker-php-ext-install pcntl
 
 WORKDIR /app
 COPY . .
 
-# Setup permissions & Folders
-RUN mkdir -p /app/storage /app/bootstrap/cache
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
-RUN chmod -R 775 /app/storage /app/bootstrap/cache
+RUN mkdir -p /app/storage /app/bootstrap/cache && \
+    chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
+    chmod -R 775 /app/storage /app/bootstrap/cache
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+COPY nginx.conf /etc/nginx/sites-available/default
 
-COPY ./nginx.conf /etc/nginx/sites-available/default
-
-# Expose port
 EXPOSE 80
 
-# Start command
-CMD service nginx start && php-fpm
+CMD php-fpm -D && nginx -g 'daemon off;'
