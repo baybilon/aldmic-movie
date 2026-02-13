@@ -21,7 +21,6 @@ RUN chmod -R 775 /app/storage /app/bootstrap/cache
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
-# Copy Nginx Configuration (Kita akan buat file ini di langkah selanjutnya)
 COPY ./nginx.conf /etc/nginx/sites-available/default
 
 # Expose port
