@@ -1,36 +1,31 @@
-FROM php:7.1-fpm
+FROM php:7.4-fpm
 
-# 1. Fix Debian Stretch sources (Arsip)
-RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
-    sed -i 's/security.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
-    sed -i '/stretch-updates/d' /etc/apt/sources.list
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git curl libpng-dev libonig-dev libxml2-dev zip unzip nginx
 
-# 2. Update dan Install minimal tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx \
-    git \
-    curl \
-    libpng-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# 3. Install ekstensi PHP secara bertahap (ini kunci agar tidak crash)
-RUN docker-php-ext-install pdo_mysql
-RUN docker-php-ext-install exif
-RUN docker-php-ext-install pcntl
+# Get Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 COPY . .
 
-# 4. Permissions
-RUN mkdir -p /app/storage /app/bootstrap/cache && \
-    chown -R www-data:www-data /app/storage /app/bootstrap/cache && \
-    chmod -R 775 /app/storage /app/bootstrap/cache
+# Setup permissions & Folders
+RUN mkdir -p /app/storage /app/bootstrap/cache
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+RUN chmod -R 775 /app/storage /app/bootstrap/cache
 
-COPY nginx.conf /etc/nginx/sites-available/default
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
+# Copy Nginx Configuration (Kita akan buat file ini di langkah selanjutnya)
+COPY ./nginx.conf /etc/nginx/sites-available/default
+
+# Expose port
 EXPOSE 80
 
-CMD php-fpm -D && nginx -g 'daemon off;'
+# Start command
+CMD service nginx start && php-fpm
