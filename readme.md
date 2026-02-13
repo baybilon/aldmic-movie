@@ -16,6 +16,14 @@
 
 - [OMDb API](http://www.omdbapi.com/) - Movie database source.
 
+## Usage
+
+```
+php artisan migrate
+php artisan db:seed
+php artisan serve
+```
+
 ### Login
 
 ![Project logo](https://i.imgur.com/pjFFbAw.png)
